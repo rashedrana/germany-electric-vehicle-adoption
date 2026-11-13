@@ -1,0 +1,5 @@
+__pycache__/
+.venv/
+ev.db
+paper/*.pdf
+.DS_Store
