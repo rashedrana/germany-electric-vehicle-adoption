@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Germany EV Adoption Dashboard — From 140 Cars to 860,000, 2010–2025</title>
+<meta name="description" content="Interactive dashboard on Germany's electric-car adoption 2010–2025: sales, market share, the 2023–24 subsidy shock, the 2025 rebound and the road to 15 million EVs by 2030, with nine peer countries. Real data: Our World in Data / IEA. Companion to the research paper by Rashed Rana.">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f7f6fa; --card:#ffffff; --ink:#1e1b26; --muted:#6d6879; --border:#e4e0ee;
+  --accent:#7c3aed; --accent2:#0078d4; --good:#059669; --bad:#dc2626;
+  --shadow:0 6px 22px rgba(30,20,60,.08); --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{max-width:1240px;margin:0 auto;padding:22px 20px 46px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+h1{font-size:25px;line-height:1.2}
+h1 .thin{color:var(--accent)}
+.sub{color:var(--muted);font-size:13px;margin-top:4px}
+.links{display:flex;gap:8px}
+.links a{font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--card);padding:7px 12px;border-radius:999px;color:var(--ink);text-decoration:none}
+.links a:hover{border-color:var(--accent);color:var(--accent)}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+.panel h3{font-size:13px;letter-spacing:1.1px;color:var(--muted);margin-bottom:10px;text-transform:uppercase}
+.controls{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:18px}
+.btnrow{display:flex;gap:7px;flex-wrap:wrap}
+.cbtn{border:1px solid var(--border);background:var(--card);color:var(--ink);font-size:13px;padding:8px 14px;border-radius:999px;cursor:pointer;font-weight:600}
+.cbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.cbtn.tgl.on{background:var(--accent2);border-color:var(--accent2)}
+input[type=range]{width:100%;accent-color:var(--accent);margin-top:8px}
+.yearbig{font-size:30px;font-weight:800;color:var(--accent);line-height:1}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px}
+.kpi .v{font-size:23px;font-weight:800}
+.kpi .u{font-size:12px;color:var(--muted);font-weight:600}
+.kpi .l{font-size:11.5px;color:var(--muted);margin-top:2px}
+.kpi .d{font-size:11.5px;font-weight:700;margin-top:6px}
+.d.up{color:var(--good)} .d.dn{color:var(--bad)} .d.flat{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1.6fr 1fr;gap:14px}
+.grid2b{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.chartbox{position:relative;height:300px}
+.chartbox.sm{height:262px}
+footer{color:var(--muted);font-size:12px;line-height:1.7;margin-top:18px}
+footer a{color:var(--accent)}
+@media (max-width:980px){ .kpis{grid-template-columns:repeat(3,1fr)} .controls,.grid2,.grid2b{grid-template-columns:1fr} }
+@media (max-width:560px){ .kpis{grid-template-columns:repeat(2,1fr)} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Germany's EV Adoption <span class="thin">Dashboard</span></h1>
+      <div class="sub">From 140 cars to 860,000: electric-car sales, market share, the subsidy shock and the road to 15 million by 2030 · 2010–2025 · Germany with France, the UK, the Netherlands, Denmark, Norway, Sweden, China, the US &amp; the EU · Data: Our World in Data / IEA</div>
+    </div>
+    <div class="links">
+      <a href="https://github.com/rashedrana/germany-electric-vehicle-adoption" target="_blank" rel="noopener">GitHub Project</a>
+      <a href="https://github.com/rashedrana/germany-electric-vehicle-adoption" target="_blank" rel="noopener">Research Paper (repo)</a>
+      <a href="https://rashedrana.github.io" target="_blank" rel="noopener">Portfolio</a>
+    </div>
+  </header>
+
+  <!-- ============ SLICERS ============ -->
+  <div class="panel">
+    <div class="controls">
+      <div>
+        <h3>Country (main view)</h3>
+        <div class="btnrow" id="countryBtns"></div>
+      </div>
+      <div>
+        <h3>Focus year</h3>
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="yearbig" id="yearBig">2025</div>
+          <div style="flex:1">
+            <input type="range" id="yearSlider" min="2010" max="2025" step="1" value="2025">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)"><span>2010</span><span>2025</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3>Trend chart shows</h3>
+        <div class="btnrow" id="metricBtns">
+          <button class="cbtn on" data-m="evSales">EV sales</button>
+          <button class="cbtn" data-m="evShare">EV share</button>
+          <button class="cbtn" data-m="cumSales">Cumulative sales</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ KPI CARDS ============ -->
+  <div class="kpis" id="kpis"></div>
+
+  <!-- ============ CHARTS ROW 1 ============ -->
+  <div class="grid2">
+    <div class="panel">
+      <h3 id="trendTitle">Electric cars sold per year</h3>
+      <div style="margin-bottom:8px" class="btnrow" id="trendToggles"></div>
+      <div class="chartbox"><canvas id="trendChart"></canvas></div>
+    </div>
+    <div class="panel">
+      <h3 id="compareTitle">EV share of new cars by country — 2025</h3>
+      <div class="chartbox"><canvas id="compareChart"></canvas></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">Click a bar to make that country the main view. Countries without data for the focus year are hidden.</div>
+    </div>
+  </div>
+
+  <!-- ============ CHARTS ROW 2 ============ -->
+  <div class="grid2b">
+    <div class="panel">
+      <h3 id="growthTitle">Year-on-year sales growth — Germany</h3>
+      <div class="chartbox sm"><canvas id="growthChart"></canvas></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">The boom (2020: +261%), the subsidy shock (2023: −16%, 2024: −19%) and the rebound (2025: +51%) — the paper's central episode.</div>
+    </div>
+    <div class="panel">
+      <h3 id="marketTitle">The whole car market — Germany (implied)</h3>
+      <div class="chartbox sm"><canvas id="marketChart"></canvas></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">Total market implied by sales ÷ share. The market itself grew 2022→2024 (+6.4%) — the EV dip was a share collapse, not a shrinking market.</div>
+    </div>
+  </div>
+
+  <!-- ============ CHARTS ROW 3 ============ -->
+  <div class="grid2b">
+    <div class="panel">
+      <h3>The road to 15 million — Germany's EV fleet (cumulative sales)</h3>
+      <div class="chartbox sm"><canvas id="targetChart"></canvas></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">Fleet proxied by cumulative sales (the paper's method). Hitting 15m by 2030 needs 2,131,704 sales a year — 2.48× the 2025 pace. At the flat 2025 pace Germany reaches only ~8.6m.</div>
+    </div>
+    <div class="panel">
+      <h3>EV share league table — top 12 countries, 2025</h3>
+      <div class="chartbox sm"><canvas id="rankChart"></canvas></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">Germany's 30.0% ranks only #19 of 59 countries — but its 860,000 cars rank #3 in the world by volume.</div>
+    </div>
+  </div>
+
+  <!-- ============ CROSS-SECTION ============ -->
+  <div class="panel">
+    <h3>Does income explain EV adoption? EV share vs GDP per capita, 59 countries (2022)</h3>
+    <div class="chartbox sm"><canvas id="crossChart"></canvas></div>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px">Each dot is a country (2022, the paper's regression sample). Richer countries adopt more (slope +10.6 pp per log unit of GDP per capita), but income explains only 19% of the variation (R² = 0.189) — and Germany (purple) sits 11.2 pp above its income-predicted share.</div>
+  </div>
+
+  <footer>
+    Built by <strong>Rashed Rana</strong> as the interactive companion to the research paper
+    <em>“From 140 to 860,000: Electric Vehicle Adoption in Germany, 2010–2025 — Growth, the Subsidy Shock, and the European Comparison”</em> — the full analysis, SQL queries and paper live in the
+    <a href="https://github.com/rashedrana/germany-electric-vehicle-adoption" target="_blank" rel="noopener">GitHub project</a>.
+    This web edition mirrors the Power BI report (star-schema model, DAX measures and page layout in the repo under
+    <code>dashboard/powerbi/</code>). Data: Our World in Data (based on IEA Global EV Outlook) — electric cars are
+    battery-electric and plug-in hybrid cars combined; the source data has no BEV/PHEV split. Total market and fleet
+    figures are derived (sales ÷ share; cumulative sales) exactly as documented in the paper.
+  </footer>
+</div>
+
+<script>
+const DATA = /*__DATA__*/{};
+const YEARS = DATA.years;
+const CCOLORS = {"Germany":"#7c3aed","France":"#0078d4","United Kingdom":"#d97706","Netherlands":"#0891b2","Denmark":"#dc2626","Norway":"#059669","Sweden":"#65a30d","China":"#db2777","United States":"#475569","European Union (27)":"#a8a29e"};
+const METRICS = {
+  evSales:  {label:"Electric cars sold per year", unit:"cars"},
+  evShare:  {label:"EV share of new cars (%)", unit:"%"},
+  cumSales: {label:"Cumulative electric cars sold", unit:"cars"}
+};
+let primary = "Germany", focusYear = 2025, metric = "evSales";
+let trendOn = {}; DATA.countries.forEach(c=>trendOn[c]=true);
+
+Chart.defaults.font.family = "-apple-system,'Segoe UI',Roboto,sans-serif";
+Chart.defaults.color = "#6d6879";
+
+const yi = y => YEARS.indexOf(y);
+const S = c => DATA.series[c];
+const fmt = v => v>=1e6 ? (v/1e6).toFixed(2)+"m" : v>=1e3 ? Math.round(v/1e3)+"k" : ""+Math.round(v);
+const fmtFull = v => Math.round(v).toLocaleString("en-US");
+const worldCum = []; { let r=0; DATA.worldSales.forEach(v=>{ r += (v||0); worldCum.push(r); }); }
+
+/* ---------- controls ---------- */
+const cb = document.getElementById("countryBtns");
+DATA.countries.forEach(c=>{
+  const b=document.createElement("button"); b.className="cbtn"+(c===primary?" on":""); b.textContent=c;
+  b.onclick=()=>{ primary=c; cb.querySelectorAll(".cbtn").forEach(x=>x.classList.toggle("on",x.textContent===c)); refresh(); };
+  cb.appendChild(b);
+});
+const tt = document.getElementById("trendToggles");
+DATA.countries.forEach(c=>{
+  const b=document.createElement("button"); b.className="cbtn tgl on"; b.textContent=c; b.style.borderColor=CCOLORS[c];
+  b.onclick=()=>{ trendOn[c]=!trendOn[c]; b.classList.toggle("on",trendOn[c]); drawTrend(); };
+  tt.appendChild(b);
+});
+document.getElementById("yearSlider").addEventListener("input", e=>{
+  focusYear = +e.target.value; document.getElementById("yearBig").textContent = focusYear; refresh();
+});
+document.querySelectorAll("#metricBtns .cbtn").forEach(b=>{
+  b.onclick=()=>{ metric=b.dataset.m; document.querySelectorAll("#metricBtns .cbtn").forEach(x=>x.classList.toggle("on",x===b)); drawTrend(); };
+});
+
+/* ---------- KPI cards ---------- */
+function deltaHTML(d, suffix, goodUp){
+  if(d===null || d===undefined || isNaN(d)) return `<div class="d flat">■ no 2010 base</div>`;
+  const up = d>0.05, dn = d<-0.05;
+  const cls = !up && !dn ? "flat" : ((up && goodUp) || (dn && !goodUp) ? "up" : "dn");
+  const arrow = up ? "▲" : dn ? "▼" : "■";
+  return `<div class="d ${cls}">${arrow} ${d>0?"+":""}${d.toFixed(1)}${suffix} vs 2010</div>`;
+}
+function kpiHTML(){
+  const s=S(primary), i=yi(focusYear), i0=0;
+  const sales=s.evSales[i], share=s.evShare[i], cum=s.cumSales[i], yoy=s.yoyPct[i], tot=s.totalMarket[i];
+  const wShare = (sales!==null && DATA.worldSales[i]) ? sales/DATA.worldSales[i]*100 : null;
+  const wShare0 = (s.evSales[i0]!==null && DATA.worldSales[i0]) ? s.evSales[i0]/DATA.worldSales[i0]*100 : null;
+  const cards = [];
+  cards.push(`<div class="kpi"><div><span class="v">${sales===null?"—":fmtFull(sales)}</span></div><div class="l">EV sales — ${primary}, ${focusYear}</div>${deltaHTML(sales&&s.evSales[i0] ? (sales/s.evSales[i0]-1)*100 : null, "%", true)}</div>`);
+  cards.push(`<div class="kpi"><div><span class="v">${share===null?"—":share.toFixed(1)}</span> <span class="u">%</span></div><div class="l">EV share of new cars — ${primary}, ${focusYear}</div>${deltaHTML(share!==null&&s.evShare[i0]!==null ? share-s.evShare[i0] : null, " pp", true)}</div>`);
+  let cumDelta;
+  if(primary==="Germany"){ const pct = cum/DATA.germanyTarget.target2030*100; cumDelta = `<div class="d flat">■ ${pct.toFixed(1)}% of the 15m-by-2030 fleet target</div>`; }
+  else { const pct = worldCum[i] ? cum/worldCum[i]*100 : 0; cumDelta = `<div class="d flat">■ ${pct.toFixed(1)}% of world cumulative sales</div>`; }
+  cards.push(`<div class="kpi"><div><span class="v">${cum===null?"—":fmt(cum)}</span></div><div class="l">Cumulative EV sales since 2010 — ${primary}</div>${cumDelta}</div>`);
+  let yoyDelta = `<div class="d flat">■ first year</div>`;
+  if(i>1 && s.yoyPct[i-1]!==null && yoy!==null){ const dpp = yoy - s.yoyPct[i-1]; yoyDelta = `<div class="d ${dpp>0?"up":dpp<0?"dn":"flat"}">${dpp>0?"▲":dpp<0?"▼":"■"} ${dpp>0?"+":""}${dpp.toFixed(1)} pp vs ${focusYear-1} growth</div>`; }
+  cards.push(`<div class="kpi"><div><span class="v">${yoy===null?"—":(yoy>0?"+":"")+yoy.toFixed(1)}</span> <span class="u">%</span></div><div class="l">Sales growth year-on-year — ${primary}, ${focusYear}</div>${yoyDelta}</div>`);
+  cards.push(`<div class="kpi"><div><span class="v">${tot===null?"—":fmt(tot)}</span></div><div class="l">Implied total car market — ${primary}, ${focusYear}</div>${deltaHTML(tot&&s.totalMarket[i0] ? (tot/s.totalMarket[i0]-1)*100 : null, "%", true)}</div>`);
+  cards.push(`<div class="kpi"><div><span class="v">${wShare===null?"—":wShare.toFixed(1)}</span> <span class="u">%</span></div><div class="l">Share of world EV sales — ${primary}, ${focusYear}</div>${deltaHTML(wShare!==null&&wShare0!==null ? wShare-wShare0 : null, " pp", true)}</div>`);
+  return cards.join("");
+}
+
+/* ---------- charts ---------- */
+let trendChart, compareChart, growthChart, marketChart, targetChart, rankChart, crossChart;
+function drawTrend(){
+  const ds = DATA.countries.filter(c=>trendOn[c]).map(c=>({
+    label:c, data:S(c)[metric], borderColor:CCOLORS[c], backgroundColor:CCOLORS[c],
+    borderWidth: c===primary?3:2, pointRadius:0, pointHoverRadius:4, tension:.25, spanGaps:true
+  }));
+  document.getElementById("trendTitle").textContent = METRICS[metric].label;
+  if(trendChart) trendChart.destroy();
+  trendChart = new Chart(document.getElementById("trendChart"), {type:"line",
+    data:{labels:YEARS, datasets:ds},
+    options:{responsive:true, maintainAspectRatio:false, interaction:{mode:"index", intersect:false},
+      scales:{y:{grid:{color:"#eee9f7"}, ticks:{callback:v=>METRICS[metric].unit==="%"?v+"%":fmt(v)}}, x:{grid:{display:false}, ticks:{maxTicksLimit:9}}},
+      plugins:{legend:{position:"bottom"}}}});
+}
+function drawCompare(){
+  document.getElementById("compareTitle").textContent = `EV share of new cars by country — ${focusYear}`;
+  const pairs = DATA.countries.map(c=>[c, S(c).evShare[yi(focusYear)]]).filter(p=>p[1]!==null && p[1]!==undefined);
+  if(compareChart) compareChart.destroy();
+  compareChart = new Chart(document.getElementById("compareChart"), {type:"bar",
+    data:{labels:pairs.map(p=>p[0]), datasets:[{data:pairs.map(p=>p[1]), backgroundColor:pairs.map(p=>CCOLORS[p[0]]), borderRadius:6}]},
+    options:{responsive:true, maintainAspectRatio:false,
+      scales:{y:{beginAtZero:true, title:{display:true, text:"% of new cars"}}, x:{grid:{display:false}}},
+      plugins:{legend:{display:false}},
+      onClick:(e,els)=>{ if(els.length){ const c=pairs[els[0].index][0]; primary=c;
+        cb.querySelectorAll(".cbtn").forEach(x=>x.classList.toggle("on",x.textContent===c)); refresh(); } }}});
+}
+function drawGrowth(){
+  document.getElementById("growthTitle").textContent = `Year-on-year sales growth — ${primary}`;
+  const s=S(primary);
+  if(growthChart) growthChart.destroy();
+  growthChart = new Chart(document.getElementById("growthChart"), {type:"bar",
+    data:{labels:YEARS, datasets:[{data:s.yoyPct,
+      backgroundColor:s.yoyPct.map(v=>v===null?"#ccc":v<0?"#dc2626":"#059669"), borderRadius:4}]},
+    options:{responsive:true, maintainAspectRatio:false,
+      scales:{y:{title:{display:true, text:"% change vs previous year"}, ticks:{callback:v=>v+"%"}},
+              x:{grid:{display:false}, ticks:{maxTicksLimit:9}}},
+      plugins:{legend:{display:false}}}});
+}
+function drawMarket(){
+  document.getElementById("marketTitle").textContent = `The whole car market — ${primary} (implied)`;
+  const s=S(primary);
+  if(marketChart) marketChart.destroy();
+  marketChart = new Chart(document.getElementById("marketChart"), {type:"bar",
+    data:{labels:YEARS, datasets:[
+      {label:"Electric (BEV + PHEV)", data:s.evSales, backgroundColor:"#7c3aed", stack:"m", borderWidth:0},
+      {label:"Other cars", data:s.nonEV, backgroundColor:"#c9c2dd", stack:"m", borderWidth:0}]},
+    options:{responsive:true, maintainAspectRatio:false,
+      scales:{x:{stacked:true, grid:{display:false}, ticks:{maxTicksLimit:9}},
+              y:{stacked:true, title:{display:true, text:"cars sold"}, ticks:{callback:v=>fmt(v)}}},
+      plugins:{legend:{position:"bottom", labels:{boxWidth:11, font:{size:10.5}}}}}});
+}
+function drawTarget(){
+  const t = DATA.germanyTarget, g = S("Germany");
+  const labels = []; for(let y=2010;y<=2030;y++) labels.push(y);
+  const bars = labels.map(y=> y<=2025 ? g.cumSales[yi(y)] : null);
+  const req = labels.map(y=> y>=2025 ? t.requiredPath[y-2025] : null);
+  const flat = labels.map(y=> y>=2025 ? t.flatPath[y-2025] : null);
+  if(targetChart) targetChart.destroy();
+  targetChart = new Chart(document.getElementById("targetChart"), {
+    data:{labels, datasets:[
+      {type:"bar", label:"Cumulative EV sales (fleet proxy)", data:bars, backgroundColor:"#7c3aed", borderRadius:3},
+      {type:"line", label:"Required pace (2,131,704 / yr)", data:req, borderColor:"#dc2626", backgroundColor:"#dc2626", borderWidth:2.5, pointRadius:0, tension:0},
+      {type:"line", label:"Flat 2025 pace (860,000 / yr)", data:flat, borderColor:"#d97706", backgroundColor:"#d97706", borderWidth:2.5, borderDash:[6,4], pointRadius:0, tension:0}]},
+    options:{responsive:true, maintainAspectRatio:false, interaction:{mode:"index", intersect:false},
+      scales:{y:{title:{display:true, text:"cumulative cars"}, ticks:{callback:v=>fmt(v)}}, x:{grid:{display:false}, ticks:{maxTicksLimit:11}}},
+      plugins:{legend:{position:"bottom", labels:{boxWidth:11, font:{size:10.5}}}}}});
+}
+function drawRank(){
+  const top = DATA.cross2025.filter(d=>!d.agg).sort((a,b)=>b.evShare-a.evShare).slice(0,12);
+  if(rankChart) rankChart.destroy();
+  rankChart = new Chart(document.getElementById("rankChart"), {type:"bar",
+    data:{labels:top.map(d=>d.country), datasets:[{data:top.map(d=>d.evShare),
+      backgroundColor:top.map(d=>d.country==="Germany"?"#7c3aed":"#b7a6e8"), borderRadius:5}]},
+    options:{indexAxis:"y", responsive:true, maintainAspectRatio:false,
+      scales:{x:{title:{display:true, text:"% of new cars electric, 2025"}}, y:{grid:{display:false}}},
+      plugins:{legend:{display:false}}}});
+}
+function drawCross(){
+  const pts = DATA.cross2022.map(d=>({x:d.gdppc, y:d.evShare, iso:d.iso, country:d.country}));
+  const deu = pts.filter(p=>p.iso==="DEU"), rest = pts.filter(p=>p.iso!=="DEU");
+  if(crossChart) crossChart.destroy();
+  crossChart = new Chart(document.getElementById("crossChart"), {type:"scatter",
+    data:{datasets:[
+      {label:"Countries (2022)", data:rest, backgroundColor:"rgba(0,120,212,.45)", pointRadius:3.5},
+      {label:"Germany", data:deu, backgroundColor:"#7c3aed", pointRadius:7, pointStyle:"rectRot"}]},
+    options:{responsive:true, maintainAspectRatio:false,
+      scales:{x:{type:"logarithmic", title:{display:true, text:"GDP per capita (2011 intl-$, log scale)"}},
+              y:{title:{display:true, text:"EV share of new cars (%)"}}},
+      plugins:{legend:{position:"bottom"},
+        tooltip:{callbacks:{label:(c)=>`${c.raw.country}: ${c.raw.y}% EV share, $${Math.round(c.raw.x).toLocaleString("en-US")} per capita`}}}}});
+}
+function refresh(){
+  document.getElementById("kpis").innerHTML = kpiHTML();
+  drawTrend(); drawCompare(); drawGrowth(); drawMarket();
+}
+refresh();
+drawTarget(); drawRank(); drawCross();
+</script>
+</body>
+</html>
