@@ -1,0 +1,4 @@
+IndicatorKey,Indicator,IndicatorCode,Category,Unit
+1,Electric cars sold (BEV + PHEV),EV_SALES,Adoption,cars
+2,Share of new cars that are electric,EV_SHARE,Adoption,% of new cars
+3,"GDP per capita (2011 int-$), 2022 cross-section",GDPPC_2022,Context,2011 int-$

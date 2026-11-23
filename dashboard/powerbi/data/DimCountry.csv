@@ -1,0 +1,11 @@
+CountryKey,Country,ISO_Code,EntityType
+9,China,CHN,Country
+15,Denmark,DNK,Country
+18,European Union (27),OWID_EU27,Aggregate
+20,France,FRA,Country
+21,Germany,DEU,Country
+39,Netherlands,NLD,Country
+41,Norway,NOR,Country
+55,Sweden,SWE,Country
+60,United Kingdom,GBR,Country
+61,United States,USA,Country

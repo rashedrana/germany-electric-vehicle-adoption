@@ -1,0 +1,65 @@
+CountryKey,Country,ISO_Code,EntityType
+1,Australia,AUS,Country
+2,Austria,AUT,Country
+3,Belgium,BEL,Country
+4,Brazil,BRA,Country
+5,Bulgaria,BGR,Country
+6,Cambodia,KHM,Country
+7,Canada,CAN,Country
+8,Chile,CHL,Country
+9,China,CHN,Country
+10,Colombia,COL,Country
+11,Costa Rica,CRI,Country
+12,Croatia,HRV,Country
+13,Cyprus,CYP,Country
+14,Czechia,CZE,Country
+15,Denmark,DNK,Country
+16,Estonia,EST,Country
+17,Europe,OWID_EUR,Aggregate
+18,European Union (27),OWID_EU27,Aggregate
+19,Finland,FIN,Country
+20,France,FRA,Country
+21,Germany,DEU,Country
+22,Greece,GRC,Country
+23,Hungary,HUN,Country
+24,Iceland,ISL,Country
+25,India,IND,Country
+26,Indonesia,IDN,Country
+27,Ireland,IRL,Country
+28,Israel,ISR,Country
+29,Italy,ITA,Country
+30,Japan,JPN,Country
+31,Jordan,JOR,Country
+32,Laos,LAO,Country
+33,Latvia,LVA,Country
+34,Lithuania,LTU,Country
+35,Luxembourg,LUX,Country
+36,Malaysia,MYS,Country
+37,Mexico,MEX,Country
+38,Nepal,NPL,Country
+39,Netherlands,NLD,Country
+40,New Zealand,NZL,Country
+41,Norway,NOR,Country
+42,Philippines,PHL,Country
+43,Poland,POL,Country
+44,Portugal,PRT,Country
+45,Rest of World,,Aggregate
+46,Romania,ROU,Country
+47,Russia,RUS,Country
+48,Seychelles,SYC,Country
+49,Singapore,SGP,Country
+50,Slovakia,SVK,Country
+51,Slovenia,SVN,Country
+52,South Africa,ZAF,Country
+53,South Korea,KOR,Country
+54,Spain,ESP,Country
+55,Sweden,SWE,Country
+56,Switzerland,CHE,Country
+57,Thailand,THA,Country
+58,Turkey,TUR,Country
+59,United Arab Emirates,ARE,Country
+60,United Kingdom,GBR,Country
+61,United States,USA,Country
+62,Uzbekistan,UZB,Country
+63,Vietnam,VNM,Country
+64,World,OWID_WRL,Aggregate
