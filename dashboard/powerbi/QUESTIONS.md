@@ -1,5 +1,5 @@
 # Business Questions & Chart Problem-Solving
-## Germany EV Adoption Dashboard — 14 questions, 14 visual types
+## Germany EV Adoption Dashboard — 19 questions, 19 visual types
 
 Dataset: Our World in Data (based on the IEA Global EV Outlook), the dataset of
 this repository's research paper: **64 countries/aggregates in the dimension ·
@@ -123,10 +123,60 @@ decline is unambiguous: sales −31.3% = EV share −35.5% (relative) × total
 market **+6.4%**. The market grew; the share collapsed. The shock was a
 policy-and-mix event, not a demand collapse.
 
+**Q15. Who actually moved in a decade — 2015 vs 2025?**
+Visual: **Slope chart** (EV share of new cars, 2015 → 2025, 10 panel countries).
+Answer: Norway gained the most — 22.0% → 97.0% (**+75.0 pp**) — then Denmark
++68.7 pp (2.3% → 71.0%), Sweden +58.6 pp, Netherlands +54.5 pp and China
++51.9 pp. Germany rose 0.73% → 30.0% (**+29.3 pp**, a 41× relative increase
+but only mid-pack in points); the United States gained the least (+9.3 pp).
+In 2015 nine of the ten peers sat at or below 3.5% — Norway was the only market
+past take-off; by 2025 five peers were at 50% or more.
+
+**Q16. When did each market tip?**
+Visual: **Heatmap** (EV share %, 10 panel countries × 16 years, colour-scaled
+cells).
+Answer: The tipping year clusters on **2020**: Germany, France, the United
+Kingdom, Denmark and the EU27 all first crossed 10% that year (Norway 2014,
+the Netherlands 2016 and Sweden 2019 were earlier; the United States only in
+2024). Norway crossed 50% first, in 2019, followed by Sweden (2022), Denmark
+(2024) and the Netherlands and China (2025). Germany crossed 25% in 2021
+(26.0%), slipped back below it in 2024 (20.0%), then rebounded to 30.0%. The
+panel median share rose from 1.2% (2015) to 44.0% (2025); in 2010 the highest
+share anywhere in the panel was 0.28% (Norway). Denmark has no 2010 value in
+the source — the cell stays empty, never filled.
+
+**Q17. What does a 30% share actually look like?**
+Visual: **Waffle chart** (100 squares = Germany's 2025 new-car market).
+Answer: **30 of every 100** new cars sold in Germany in 2025 were electric
+(BEV + PHEV combined), 70 were not. The same waffle for 2015 would show fewer
+than one filled square (0.73%), and even the 2022 peak year filled only 31 —
+the 2025 rebound essentially restored the peak share on a bigger market.
+
+**Q18. How steep is the remaining climb to 15 million?**
+Visual: **Step line chart** (Germany's cumulative EV sales as yearly steps,
+against the straight-line required path 2025 → 2030).
+Answer: The actual staircase reaches **4,341,480 by end-2025 — 28.9% of the
+target**. The required path adds a constant **2,131,704 cars every year**, so
+the fleet would have to almost double by 2027 (8,604,888) and land exactly on
+15,000,000 at end-2030. Every year run at the 2025 pace (860,000) instead of
+the required pace widens the final gap by a further ~1.27 million cars.
+
+**Q19. Where does Germany sit on the 2025 European map?**
+Visual: **Tile-grid map** (one tile per country in geographic position,
+colour = EV share of new cars, 2025; choropleth-style reading without
+distorting by land area).
+Answer: Norway **97.0%** tops Europe, then Denmark 71.0%, Iceland 62.0%,
+Sweden 61.0%, the Netherlands 58.0% and Finland 57.0% — all six countries
+above 50% are northern. Germany's 30.0% ranks **#14 of the 31 European
+countries** in the panel, above the European median of 22.0%; 15 of the 31
+countries are at 25% or more. The bottom of the map is south-eastern:
+Croatia 5.4%, Romania 5.6%, Bulgaria 6.0% and Slovakia 9.1%.
+
 ---
 
 Coverage checklist (Power BI visual palette): KPI card ✓ · gauge ✓ · line ✓ ·
 clustered column ✓ · waterfall ✓ · bar (change) ✓ · stacked column ✓ ·
 area ✓ · scatter ✓ · filled map ✓ · treemap ✓ · ribbon ✓ · donut ✓ ·
-matrix + decomposition tree ✓ — plus slicers, bookmarks and drill-through
+matrix + decomposition tree ✓ · slope chart ✓ · heatmap ✓ · waffle ✓ ·
+step line ✓ · tile-grid map ✓ — plus slicers, bookmarks and drill-through
 (layout spec).

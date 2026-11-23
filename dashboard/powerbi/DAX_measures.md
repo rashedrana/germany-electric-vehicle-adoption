@@ -149,6 +149,48 @@ Selected Year Label =
 "Focus year: " & SELECTEDVALUE ( DimYear[Year], 2025 )
 ```
 
+## Retrofit measures (Q15–Q19 visuals)
+
+```dax
+EV Share 2015 % =
+CALCULATE ( [EV Share %], DimYear[Year] = 2015 )
+```
+
+```dax
+EV Share Change 2015-2025 (pp) =
+CALCULATE ( [EV Share %], DimYear[Year] = 2025 ) - [EV Share 2015 %]
+```
+(Drives the Q15 slope chart — one line per country between the two years.)
+
+```dax
+EVs per 100 New Cars =
+ROUND ( [EV Share %], 0 )
+```
+(Drives the Q17 waffle chart — filled squares out of 100.)
+
+```dax
+Required Fleet Path (DE) =
+VAR StartFleet =
+    CALCULATE ( [Cumulative EV Sales], DimYear[Year] = 2025, DimCountry[ISO_Code] = "DEU" )
+VAR AnnualNeed =
+    DIVIDE ( [Fleet Target 2030] - StartFleet, 5 )
+RETURN
+    StartFleet + AnnualNeed * ( MAX ( DimYear[Year] ) - 2025 )
+```
+(Drives the Q18 step line — the straight-line path from the 2025 fleet to
+15,000,000 at 2030; plot alongside [Cumulative EV Sales] with stepped lines.)
+
+```dax
+Countries at 50%+ Share (2025) =
+CALCULATE (
+    COUNTROWS ( DimCountry ),
+    FILTER ( DimCountry, CALCULATE ( [EV Share %], DimYear[Year] = 2025 ) >= 50 )
+)
+```
+(Supporting count for the Q19 tile map — run over the full country
+dimension restricted to Europe it returns 6 for 2025: Norway, Denmark,
+Iceland, Sweden, the Netherlands and Finland.)
+
 ---
 
 Notes
