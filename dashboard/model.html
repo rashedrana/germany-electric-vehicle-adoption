@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Germany&rsquo;s EV Adoption — Data Model</title>
+<meta name="description" content="Star-schema data model, table dictionary and data preparation behind the Germany&rsquo;s EV Adoption dashboard by Rashed Rana.">
+<style>
+:root{
+  --bg:#f7f6fa; --card:#ffffff; --ink:#1e1b26; --muted:#6d6879; --border:#e4e0ee;
+  --accent:#7c3aed; --accent2:#0078d4;
+  --shadow:0 6px 22px rgba(30,20,60,.08); --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{max-width:1240px;margin:0 auto;padding:22px 20px 46px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+h1{font-size:25px;line-height:1.2}
+h1 .thin{color:var(--accent)}
+.sub{color:var(--muted);font-size:13px;margin-top:4px}
+.links{display:flex;gap:8px;flex-wrap:wrap}
+.links a{font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--card);padding:7px 12px;border-radius:999px;color:var(--ink);text-decoration:none}
+.links a:hover{border-color:var(--accent);color:var(--accent)}
+.links a.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+.panel h3{font-size:13px;letter-spacing:1.1px;color:var(--muted);margin-bottom:10px;text-transform:uppercase}
+.lead{font-size:14.5px;line-height:1.65;margin-bottom:14px}
+.lead b{color:var(--accent)}
+svg{width:100%;height:auto;display:block}
+svg text{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.svgb{fill:#ffffff;stroke:#e4e0ee}
+.svgf{fill:#f1eafd;stroke:#7c3aed;stroke-width:1.5}
+.svgl{stroke:#7c3aed;stroke-width:1.3;opacity:.6}
+.svgt{fill:#1e1b26;font-weight:600}
+.svgs{fill:#6d6879}
+.svgn{fill:#7c3aed;font-weight:600}
+.caption{font-size:12px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.6}
+.scrollx{overflow-x:auto}
+table.dict{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
+.dict th{text-align:left;font-size:11px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);padding:6px 10px;border-bottom:1px solid var(--border)}
+.dict td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.55}
+.dict tr:last-child td{border-bottom:none}
+.dict td.t{font-weight:700;white-space:nowrap}
+.dict td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+.dict .k{color:var(--muted)}
+.tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.7px;padding:2px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted);margin-left:8px;vertical-align:2px;text-transform:uppercase}
+.tag.fact{color:var(--accent);border-color:var(--accent)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.subbox{border:1px solid var(--border);border-radius:10px;padding:14px}
+.subbox h4{font-size:13.5px;margin-bottom:6px}
+.subbox p{font-size:13px;color:var(--muted);line-height:1.65}
+ul.clean{margin:0;padding-left:18px;font-size:13.5px;line-height:1.7}
+ul.clean li{margin-bottom:7px}
+footer{color:var(--muted);font-size:12px;line-height:1.7;margin-top:18px}
+footer a{color:var(--accent)}
+@media (max-width:860px){ .cols{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Germany&rsquo;s EV Adoption <span class="thin">Data Model</span></h1>
+      <div class="sub">How the dashboard&rsquo;s Power BI model is structured, and how the data was prepared &middot; Data: Our World in Data / IEA</div>
+    </div>
+    <div class="links">
+      <a href="index.html">Dashboard</a>
+      <a href="model.html" class="on">Data Model</a>
+      <a href="https://github.com/rashedrana/germany-electric-vehicle-adoption" target="_blank" rel="noopener">GitHub Project</a>
+      <a href="https://github.com/rashedrana/germany-electric-vehicle-adoption" target="_blank" rel="noopener">Research Paper (repo)</a>
+      <a href="https://rashedrana.github.io" target="_blank" rel="noopener">Portfolio</a>
+    </div>
+  </header>
+
+  <p class="lead">Star schema &middot; <b>4 fact tables</b> &middot; <b>4 dimensions</b> &middot; <b>2,999 fact rows</b> &mdash; stated openly, nothing padded &middot; Source: Our World in Data, based on the IEA Global EV Outlook</p>
+
+  <div class="panel">
+    <h3>Star schema</h3>
+    <svg viewBox="0 0 820 450" role="img" aria-label="Star schema diagram"><g><line class="svgl" x1="192" y1="83" x2="290" y2="65"/><line class="svgl" x1="192" y1="83" x2="290" y2="175"/><line class="svgl" x1="192" y1="357" x2="290" y2="285"/><line class="svgl" x1="192" y1="357" x2="290" y2="395"/><line class="svgl" x1="530" y1="65" x2="628" y2="83"/><line class="svgl" x1="530" y1="175" x2="628" y2="83"/><line class="svgl" x1="530" y1="285" x2="628" y2="357"/><line class="svgl" x1="530" y1="395" x2="628" y2="357"/><line class="svgl" x1="530" y1="175" x2="628" y2="357"/><rect class="svgb" x="24" y="56" width="168" height="54" rx="9"/><text class="svgt" x="108.0" y="80.0" text-anchor="middle" font-size="12.5">DimCountry</text><text class="svgs" x="108.0" y="98.0" text-anchor="middle" font-size="10.5">10 rows · peer panel</text><rect class="svgb" x="24" y="330" width="168" height="54" rx="9"/><text class="svgt" x="108.0" y="354.0" text-anchor="middle" font-size="12.5">DimCountry_Full</text><text class="svgs" x="108.0" y="372.0" text-anchor="middle" font-size="10.5">64 rows · all entities</text><rect class="svgb" x="628" y="56" width="168" height="54" rx="9"/><text class="svgt" x="712.0" y="80.0" text-anchor="middle" font-size="12.5">DimYear</text><text class="svgs" x="712.0" y="98.0" text-anchor="middle" font-size="10.5">16 rows · 2010–2025</text><rect class="svgb" x="628" y="330" width="168" height="54" rx="9"/><text class="svgt" x="712.0" y="354.0" text-anchor="middle" font-size="12.5">DimIndicator</text><text class="svgs" x="712.0" y="372.0" text-anchor="middle" font-size="10.5">3 rows</text><rect class="svgf" x="290" y="36" width="240" height="58" rx="9"/><text class="svgt" x="410.0" y="62.0" text-anchor="middle" font-size="12.5">FactCountryYear</text><text class="svgs" x="410.0" y="80.0" text-anchor="middle" font-size="10.5">159 rows · country × year</text><rect class="svgf" x="290" y="146" width="240" height="58" rx="9"/><text class="svgt" x="410.0" y="172.0" text-anchor="middle" font-size="12.5">FactIndicator</text><text class="svgs" x="410.0" y="190.0" text-anchor="middle" font-size="10.5">318 rows · × indicator</text><rect class="svgf" x="290" y="256" width="240" height="58" rx="9"/><text class="svgt" x="410.0" y="282.0" text-anchor="middle" font-size="12.5">FactCountryYear_Full</text><text class="svgs" x="410.0" y="300.0" text-anchor="middle" font-size="10.5">823 rows · all 64 entities</text><rect class="svgf" x="290" y="366" width="240" height="58" rx="9"/><text class="svgt" x="410.0" y="392.0" text-anchor="middle" font-size="12.5">FactIndicator_Full</text><text class="svgs" x="410.0" y="410.0" text-anchor="middle" font-size="10.5">1,699 rows · all entities</text><text class="svgn" x="228" y="68" font-size="10">1 &#8594; *</text><text class="svgn" x="228" y="178" font-size="10">1 &#8594; *</text><text class="svgn" x="228" y="288" font-size="10">1 &#8594; *</text><text class="svgn" x="560" y="68" font-size="10">1 &#8594; *</text><text class="svgn" x="560" y="288" font-size="10">1 &#8594; *</text><text class="svgn" x="566" y="262" font-size="10">1 &#8594; *</text></g></svg>
+    <div class="caption">Wide and long fact shapes share the conformed DimCountry and DimYear dimensions; DimIndicator slices the long facts. DimYear carries the paper&rsquo;s phase band (Take-off &middot; Boom &middot; Subsidy shock &middot; Rebound).</div>
+  </div>
+
+  <div class="panel">
+    <h3>Table dictionary</h3>
+    <div class="scrollx"><table class="dict">
+      <tr><th>Table</th><th>Grain</th><th style="text-align:right">Rows</th><th>Key columns &amp; contents</th></tr>
+          <tr><td class="t">FactCountryYear<span class="tag fact">Fact</span></td><td>country &times; year</td><td class="n">159</td><td>CountryKey, YearKey <span class='k'>(FKs)</span> &middot; EVSales, EVShare_Pct, CumulativeEVSales, ImpliedTotalMarket, YoYGrowth_Pct</td></tr>
+          <tr><td class="t">FactIndicator<span class="tag fact">Fact</span></td><td>country &times; year &times; indicator</td><td class="n">318</td><td>CountryKey, YearKey, IndicatorKey <span class='k'>(FKs)</span> &middot; Value &mdash; the 2 source indicators</td></tr>
+          <tr><td class="t">FactCountryYear_Full<span class="tag fact">Fact</span></td><td>country &times; year</td><td class="n">823</td><td><span class='k'>Wide table for all 64 entities in the OWID extract (2010&ndash;2025), same measures</span></td></tr>
+          <tr><td class="t">FactIndicator_Full<span class="tag fact">Fact</span></td><td>country &times; year &times; indicator</td><td class="n">1,699</td><td><span class='k'>EV sales (822 rows) + EV share (816) + the 2022 GDP-per-capita cross-section (59)</span></td></tr>
+          <tr><td class="t">DimCountry<span class="tag">Dim</span></td><td>country</td><td class="n">10</td><td>CountryKey <span class='k'>(PK)</span> &middot; Country, ISO_Code, EntityType &mdash; Germany, France, UK, Netherlands, Denmark, Norway, Sweden, China, US, EU (27)</td></tr>
+          <tr><td class="t">DimCountry_Full<span class="tag">Dim</span></td><td>country</td><td class="n">64</td><td>CountryKey <span class='k'>(PK)</span> &middot; every country/aggregate, flagged Country vs Aggregate (Europe, EU27, Rest of World, World)</td></tr>
+          <tr><td class="t">DimYear<span class="tag">Dim</span></td><td>year</td><td class="n">16</td><td>YearKey <span class='k'>(PK)</span> &middot; Year, Phase &mdash; 2010&ndash;2025: Take-off 2010&ndash;19 &middot; Boom 2020&ndash;22 &middot; Subsidy shock 2023&ndash;24 &middot; Rebound 2025</td></tr>
+          <tr><td class="t">DimIndicator<span class="tag">Dim</span></td><td>indicator</td><td class="n">3</td><td>IndicatorKey <span class='k'>(PK)</span> &middot; Indicator, IndicatorCode, Category, Unit &mdash; EV sales, EV share, GDP per capita 2022</td></tr>
+    </table></div>
+  </div>
+
+  <div class="panel">
+    <h3>Structured &amp; unstructured data</h3>
+    <div class="cols">
+      <div class="subbox"><h4>Structured data</h4><p>A fully structured annual panel: two source series &mdash; EV sales and EV share of new cars &mdash; from Our World in Data (based on the IEA Global EV Outlook), keyed by country and year, plus the paper&rsquo;s 2022 income cross-section. Wide and long shapes of the same data are kept side by side, as in Projects 1 and 2.</p></div>
+      <div class="subbox"><h4>Unstructured data</h4><p>Fully structured source &mdash; no free text. The OWID/IEA panel carries numeric series only; there is no unstructured content to process.</p></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>How the data was cleaned</h3>
+    <ul class="clean">
+      <li>Derived columns are computed in data prep exactly as in the paper, and labelled derivations, not source data: cumulative sales (running sum &mdash; the fleet proxy behind the 15-million target), implied total market (EV sales &divide; EV share) and YoY growth.</li><li>Coverage gaps are real source gaps, kept as missing rows: a few small markets enter the OWID panel after 2010, and 6 entity-years carry sales without a published share, so no implied market is computed for them.</li><li>The source carries no BEV/PHEV split &mdash; &ldquo;EV&rdquo; means battery-electric and plug-in hybrid combined, and no chart pretends otherwise.</li><li>Total fact rows: 2,999. The panel is intrinsically smaller than Projects 1&ndash;2 (16 years &times; 64 entities is everything the source holds) &mdash; the count is stated openly, and no rows are padded or interpolated.</li>
+    </ul>
+  </div>
+
+  <footer>
+    Model documentation for the Power BI edition of this dashboard &mdash; the star-schema CSVs, DAX measures,
+    business questions and page layout live in the repo under <code>dashboard/powerbi/</code>.
+    Built by <strong>Rashed Rana</strong> &middot; <a href="index.html">Back to the dashboard</a>
+  </footer>
+</div>
+</body>
+</html>
