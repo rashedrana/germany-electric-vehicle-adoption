@@ -114,3 +114,9 @@ Comparison." Manuscript prepared for journal submission. The paper was
 prepared with AI assistance for data analysis and drafting, under the
 author's direction; all results were computed from the published
 datasets with the code in this repository.
+
+## Citation
+
+Rana, R. (2026). Electric Vehicle Adoption in Germany, 2010–2025: Growth, the Subsidy Shock, and the European Comparison. Zenodo. https://doi.org/10.5281/zenodo.24624469
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24624469.svg)](https://doi.org/10.5281/zenodo.24624469)
